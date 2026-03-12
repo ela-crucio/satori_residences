@@ -215,18 +215,17 @@ HTML;
   </div>
 </div>
 
-<?php
-$extraScripts = <<<SCRIPT
-<script>
-const APP_URL = '<?= APP_URL ?>';
-const CSRF    = '<?= $csrfToken ?>';
-let bookingData = {};
+<?php include '_footer.php'; ?>
 
-// ---- STEP NAVIGATION ----
+<script>
+var APP_URL = '<?php echo APP_URL; ?>';
+var CSRF    = '<?php echo $csrfToken; ?>';
+var bookingData = {};
+
 function goToStep(n) {
-  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.remove('active'); });
   document.getElementById('panel'+n).classList.add('active');
-  document.querySelectorAll('.step-item').forEach((el,i) => {
+  document.querySelectorAll('.step-item').forEach(function(el,i) {
     el.classList.remove('active','done');
     if (i+1 < n) el.classList.add('done');
     if (i+1 === n) el.classList.add('active');
@@ -234,28 +233,26 @@ function goToStep(n) {
   window.scrollTo({top:200,behavior:'smooth'});
 }
 
-// ---- STEP 1: CHECK AVAILABILITY ----
 async function checkAvailability() {
-  const ci  = document.getElementById('checkIn').value;
-  const co  = document.getElementById('checkOut').value;
-  const uid = document.getElementById('unitTypeSelect').value;
-  const res = document.getElementById('availResult');
+  var ci  = document.getElementById('checkIn').value;
+  var co  = document.getElementById('checkOut').value;
+  var uid = document.getElementById('unitTypeSelect').value;
+  var res = document.getElementById('availResult');
 
   if (!ci||!co||!uid) { res.innerHTML='<div class="alert alert-warning">Please fill in all fields.</div>'; return; }
-
   res.innerHTML = '<div class="text-muted"><i class="bi bi-hourglass-split me-1"></i>Checking availability...</div>';
 
-  const form = new FormData();
+  var form = new FormData();
   form.append('unit_type_id', uid);
   form.append('check_in',  ci);
   form.append('check_out', co);
 
-  const r = await fetch(APP_URL+'/ajax/check-availability.php', {method:'POST', body:form});
-  const d = await r.json();
+  var r = await fetch(APP_URL+'/ajax/check-availability.php', {method:'POST', body:form});
+  var d = await r.json();
 
   if (d.available) {
-    res.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>${d.message}<br>
-      <strong>₱${Number(d.price_per_night).toLocaleString()}/night × ${d.nights} nights = ₱${Number(d.total_price).toLocaleString()}</strong></div>`;
+    res.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>'+d.message+'<br>'
+      + '<strong>&#8369;'+Number(d.price_per_night).toLocaleString()+'/night &times; '+d.nights+' nights = &#8369;'+Number(d.total_price).toLocaleString()+'</strong></div>';
 
     bookingData = {
       unit_type_id: uid,
@@ -267,9 +264,9 @@ async function checkAvailability() {
       max_guests: document.getElementById('unitTypeSelect').selectedOptions[0].dataset.max,
     };
     updateSide();
-    setTimeout(() => goToStep(2), 800);
+    setTimeout(function(){ goToStep(2); }, 800);
   } else {
-    res.innerHTML = `<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>${d.message}</div>`;
+    res.innerHTML = '<div class="alert alert-danger"><i class="bi bi-x-circle me-2"></i>'+d.message+'</div>';
   }
 }
 
@@ -282,12 +279,11 @@ function updateSide() {
   document.getElementById('sideTotal').textContent     = bookingData.total_price ? '₱'+Number(bookingData.total_price).toLocaleString() : '—';
 }
 
-// ---- STEP 2: VALIDATE GUEST ----
 function validateGuestStep() {
-  const name  = document.getElementById('fullName').value.trim();
-  const email = document.getElementById('emailAddr').value.trim();
-  const phone = document.getElementById('phoneNum').value.trim();
-  const ng    = parseInt(document.getElementById('numGuests').value);
+  var name  = document.getElementById('fullName').value.trim();
+  var email = document.getElementById('emailAddr').value.trim();
+  var phone = document.getElementById('phoneNum').value.trim();
+  var ng    = parseInt(document.getElementById('numGuests').value);
 
   if (!name)  { alert('Please enter your full name.'); return; }
   if (!email) { alert('Please enter a valid email.'); return; }
@@ -296,80 +292,67 @@ function validateGuestStep() {
   if (ng > parseInt(bookingData.max_guests)) {
     alert('Maximum guests for this unit is '+bookingData.max_guests+'.'); return;
   }
-
-  bookingData.full_name = name;
-  bookingData.email     = email;
-  bookingData.phone     = phone;
-  bookingData.num_guests= ng;
+  bookingData.full_name   = name;
+  bookingData.email       = email;
+  bookingData.phone       = phone;
+  bookingData.num_guests  = ng;
   bookingData.special_req = document.getElementById('specialReq').value.trim();
-
   goToStep(3);
 }
 
-// ---- STEP 3: PAYMENT ----
-let selectedPayment = null;
+var selectedPayment = null;
 function selectPayment(method) {
   selectedPayment = method;
-  ['gcash','online_payment','cash_on_arrival'].forEach(m => {
+  ['gcash','online_payment','cash_on_arrival'].forEach(function(m) {
     document.getElementById('opt-'+m).classList.toggle('selected', m===method);
     document.getElementById('chk-'+m).style.display = m===method ? '' : 'none';
   });
-
-  const panel = document.getElementById('paymentSimPanel');
-  const msg   = document.getElementById('paySimMessage');
-  panel.style.display = '';
-
-  const msgs = {
-    gcash:           '<i class="bi bi-phone me-2" style="color:var(--gold)"></i><strong>GCash Selected</strong> — You will be redirected to GCash to complete payment. Instant confirmation upon success.',
-    online_payment:  '<i class="bi bi-credit-card me-2" style="color:var(--gold)"></i><strong>Online Payment Selected</strong> — Secure card processing. Your details are encrypted and never stored.',
-    cash_on_arrival: '<i class="bi bi-cash-stack me-2" style="color:var(--gold)"></i><strong>Cash on Arrival Selected</strong> — Pay at check-in. Booking is tentative until payment is received.',
+  document.getElementById('paymentSimPanel').style.display = '';
+  var msgs = {
+    gcash:           '<i class="bi bi-phone me-2" style="color:var(--gold)"></i><strong>GCash Selected</strong> — You will be redirected to GCash to complete payment.',
+    online_payment:  '<i class="bi bi-credit-card me-2" style="color:var(--gold)"></i><strong>Online Payment Selected</strong> — Secure card processing.',
+    cash_on_arrival: '<i class="bi bi-cash-stack me-2" style="color:var(--gold)"></i><strong>Cash on Arrival Selected</strong> — Pay at check-in.',
   };
-  msg.innerHTML = msgs[method];
+  document.getElementById('paySimMessage').innerHTML = msgs[method];
   bookingData.payment_method = method;
 }
 
 function showBookingSummary() {
   if (!selectedPayment) { alert('Please select a payment method.'); return; }
-
-  const payLabels = {gcash:'GCash',online_payment:'Online Payment',cash_on_arrival:'Cash on Arrival'};
-  document.getElementById('summaryContent').innerHTML = `
-    <div class="table-responsive">
-      <table class="table table-borderless" style="font-size:0.9rem;">
-        <tr><td class="text-muted">Unit Type</td><td class="fw-semibold">${bookingData.unit_name}</td></tr>
-        <tr><td class="text-muted">Check-in</td><td class="fw-semibold">${bookingData.check_in}</td></tr>
-        <tr><td class="text-muted">Check-out</td><td class="fw-semibold">${bookingData.check_out}</td></tr>
-        <tr><td class="text-muted">Total Nights</td><td class="fw-semibold">${bookingData.nights}</td></tr>
-        <tr><td class="text-muted">Price/Night</td><td class="fw-semibold">₱${Number(bookingData.price_per_night).toLocaleString()}</td></tr>
-        <tr><td class="text-muted">Total Amount</td><td class="fw-semibold" style="color:var(--gold);font-size:1.1rem;">₱${Number(bookingData.total_price).toLocaleString()}</td></tr>
-        <tr><td class="text-muted">Guest</td><td class="fw-semibold">${bookingData.full_name}</td></tr>
-        <tr><td class="text-muted">Email</td><td>${bookingData.email}</td></tr>
-        <tr><td class="text-muted">Payment</td><td class="fw-semibold">${payLabels[bookingData.payment_method]}</td></tr>
-      </table>
-    </div>
-  `;
+  var payLabels = {gcash:'GCash',online_payment:'Online Payment',cash_on_arrival:'Cash on Arrival'};
+  document.getElementById('summaryContent').innerHTML =
+    '<div class="table-responsive"><table class="table table-borderless" style="font-size:0.9rem;">'
+    + '<tr><td class="text-muted">Unit Type</td><td class="fw-semibold">'+bookingData.unit_name+'</td></tr>'
+    + '<tr><td class="text-muted">Check-in</td><td class="fw-semibold">'+bookingData.check_in+'</td></tr>'
+    + '<tr><td class="text-muted">Check-out</td><td class="fw-semibold">'+bookingData.check_out+'</td></tr>'
+    + '<tr><td class="text-muted">Total Nights</td><td class="fw-semibold">'+bookingData.nights+'</td></tr>'
+    + '<tr><td class="text-muted">Price/Night</td><td class="fw-semibold">&#8369;'+Number(bookingData.price_per_night).toLocaleString()+'</td></tr>'
+    + '<tr><td class="text-muted">Total Amount</td><td class="fw-semibold" style="color:var(--gold);font-size:1.1rem;">&#8369;'+Number(bookingData.total_price).toLocaleString()+'</td></tr>'
+    + '<tr><td class="text-muted">Guest</td><td class="fw-semibold">'+bookingData.full_name+'</td></tr>'
+    + '<tr><td class="text-muted">Email</td><td>'+bookingData.email+'</td></tr>'
+    + '<tr><td class="text-muted">Payment</td><td class="fw-semibold">'+payLabels[bookingData.payment_method]+'</td></tr>'
+    + '</table></div>';
   goToStep(4);
 }
 
-// ---- STEP 4: SUBMIT BOOKING ----
 async function submitBooking() {
-  const btn = document.getElementById('confirmBtn');
-  const err = document.getElementById('submitError');
+  var btn = document.getElementById('confirmBtn');
+  var err = document.getElementById('submitError');
   err.style.display = 'none';
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
 
-  // Simulate payment delay for GCash / Online
   if (bookingData.payment_method === 'gcash') {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirecting to GCash...';
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(function(r){ setTimeout(r, 2000); });
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming payment...';
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(function(r){ setTimeout(r, 1500); });
   } else if (bookingData.payment_method === 'online_payment') {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing card...';
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(function(r){ setTimeout(r, 2000); });
   }
 
-  const form = new FormData();
+  var form = new FormData();
   form.append('csrf_token',       CSRF);
   form.append('unit_type_id',     bookingData.unit_type_id);
   form.append('check_in_date',    bookingData.check_in);
@@ -381,8 +364,8 @@ async function submitBooking() {
   form.append('special_requests', bookingData.special_req || '');
   form.append('payment_method',   bookingData.payment_method);
 
-  const r = await fetch(APP_URL+'/ajax/submit-booking.php', {method:'POST', body:form});
-  const d = await r.json();
+  var r = await fetch(APP_URL+'/ajax/submit-booking.php', {method:'POST', body:form});
+  var d = await r.json();
 
   if (d.success) {
     window.location.href = d.redirect;
@@ -393,17 +376,4 @@ async function submitBooking() {
     btn.innerHTML = '<i class="bi bi-lock-fill me-2"></i>Confirm & Pay';
   }
 }
-
-// Pre-select unit from URL
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('unit')) {
-  const sel = document.getElementById('unitTypeSelect');
-  for (let o of sel.options) {
-    if (o.dataset.slug === urlParams.get('unit')) { o.selected = true; break; }
-  }
-}
 </script>
-SCRIPT;
-?>
-
-<?php include '_footer.php'; ?>

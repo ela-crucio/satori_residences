@@ -37,16 +37,17 @@ HTML;
 
             <!-- PAYMENT STATUS -->
             <?php
-            $payStatusColor = match($booking['payment_status'] ?? 'pending') {
-                'paid'    => 'success',
-                'failed'  => 'danger',
-                default   => 'warning',
-            };
-            $payStatusLabel = match($booking['payment_status'] ?? 'pending') {
-                'paid'    => 'Payment Confirmed',
-                'failed'  => 'Payment Failed',
-                default   => 'Payment Pending',
-            };
+            $ps = isset($booking['payment_status']) ? $booking['payment_status'] : 'pending';
+            if ($ps === 'paid') {
+                $payStatusColor = 'success';
+                $payStatusLabel = 'Payment Confirmed';
+            } elseif ($ps === 'failed') {
+                $payStatusColor = 'danger';
+                $payStatusLabel = 'Payment Failed';
+            } else {
+                $payStatusColor = 'warning';
+                $payStatusLabel = 'Payment Pending';
+            }
             ?>
             <div class="text-center mb-4">
               <span class="status-badge bg-<?= $payStatusColor ?> text-white"><?= $payStatusLabel ?></span>
