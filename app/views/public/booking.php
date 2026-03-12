@@ -85,36 +85,87 @@ HTML;
                 <button class="btn btn-gold w-100 mt-4" onclick="checkAvailability()">Check Availability</button>
               </div>
 
-              <!-- STEP 2: GUEST DETAILS -->
-              <div class="step-panel" id="panel2">
-                <h5 class="mb-4" style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;">Guest Information</h5>
-                <div class="row g-3">
-                  <div class="col-12">
-                    <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Full Name *</label>
-                    <input type="text" class="form-control" id="fullName" placeholder="Juan dela Cruz" maxlength="100">
+             <!-- STEP 2: GUEST DETAILS -->
+                  <div class="step-panel" id="panel2">
+                    <h5 class="mb-4" style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;">Guest Information</h5>
+                    <div class="row g-3">
+
+                      <div class="col-12">
+                        <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Full Name *</label>
+                        <input 
+                          type="text" 
+                          class="form-control" 
+                          id="fullName" 
+                          placeholder="Juan dela Cruz" 
+                          maxlength="100"
+                          pattern="^[A-Za-z\s\.']+$"
+                          title="Name should only contain letters and spaces"
+                          required
+                        >
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Email Address *</label>
+                        <input 
+                          type="email" 
+                          class="form-control" 
+                          id="emailAddr" 
+                          placeholder="juan@email.com"
+                          required
+                        >
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Phone Number *</label>
+                        <input 
+                          type="tel" 
+                          class="form-control" 
+                          id="phoneNum" 
+                          placeholder="09123456789"
+                          pattern="^09\d{9}$"
+                          maxlength="11"
+                          title="Enter a valid Philippine phone number (09XXXXXXXXX)"
+                          oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+                          required
+                        >
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Number of Guests *</label>
+                        <input 
+                          type="number" 
+                          class="form-control" 
+                          id="numGuests" 
+                          value="1" 
+                          min="1"
+                          max="20"
+                          required
+                        >
+                      </div>
+
+                      <div class="col-12">
+                        <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">
+                          Special Requests <span style="font-weight:400;text-transform:none;">(optional)</span>
+                        </label>
+                        <textarea 
+                          class="form-control" 
+                          id="specialReq" 
+                          rows="3" 
+                          placeholder="Late check-in, extra pillows, etc."
+                        ></textarea>
+                      </div>
+
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4">
+                      <button class="btn btn-outline-gold" onclick="goToStep(1)">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                      </button>
+                      <button class="btn btn-gold flex-fill" onclick="validateGuestStep()">
+                        Continue to Payment
+                      </button>
+                    </div>
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Email Address *</label>
-                    <input type="email" class="form-control" id="emailAddr" placeholder="juan@email.com">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Phone Number *</label>
-                    <input type="tel" class="form-control" id="phoneNum" placeholder="+63 9XX XXX XXXX">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Number of Guests *</label>
-                    <input type="number" class="form-control" id="numGuests" value="1" min="1">
-                  </div>
-                  <div class="col-12">
-                    <label class="form-label fw-semibold" style="font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Special Requests <span style="font-weight:400;text-transform:none;">(optional)</span></label>
-                    <textarea class="form-control" id="specialReq" rows="3" placeholder="Late check-in, extra pillows, etc."></textarea>
-                  </div>
-                </div>
-                <div class="d-flex gap-3 mt-4">
-                  <button class="btn btn-outline-gold" onclick="goToStep(1)"><i class="bi bi-arrow-left me-1"></i>Back</button>
-                  <button class="btn btn-gold flex-fill" onclick="validateGuestStep()">Continue to Payment</button>
-                </div>
-              </div>
 
               <!-- STEP 3: PAYMENT -->
               <div class="step-panel" id="panel3">
